@@ -45,9 +45,9 @@ let listSchema = new mongoose.Schema({
 
 
 // create model that implements the list Schema
+
 let list = mongoose.model('list', listSchema);
 
-// export the controller back to app.js
 module.exports = function(app) {
 
 // Handle GET requests
