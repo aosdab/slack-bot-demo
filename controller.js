@@ -26,23 +26,19 @@ mongoose.connect('mongodb://chingu-todo:todoBOT@ds161121.mlab.com:61121/todo-bot
 // create a schema for the items in the list array (format for each todo item)
 
 let itemsSchema = new mongoose.Schema({
-
     _id: {type: Number, default: 0},
     listItem: String,
     timestampCreated: {type: Date, default: Date.now()},
     completed: {type: Boolean, default: false},
     timestampCompleted: Date
-
 });
 
 // create a schema for each document in the collection. each document (containing the todo list array)
 // is unique to the slack user who calls it. their slack id replaces the default _id passed by mongoDB
-
 let listSchema = new mongoose.Schema({
     _id: String,
     list: [itemsSchema]
 });
-
 
 // create model that implements the list Schema
 
@@ -67,10 +63,7 @@ module.exports = function(app) {
             console.error("Invalid Token");
             return res.json({text: "Error: Invalid Token"});
         }
-
-
         if (req.text) {
-
         // pull the request sent from slack to the bot. extract the text, and slack user ID
         // the text will contain both the command (followed by a space) and the string associated with the command
         // (after the space) as seen by the substrings
@@ -99,6 +92,7 @@ module.exports = function(app) {
 
                 switch(command){
                     case 'add':
+
                             // if the user already has a list then push the "added" item into that list and save to the database
                             // doc is always returned as an array. to determine if the list exists check the length, if
                             // it is empty then it does not exist and move to the else statement
@@ -164,6 +158,7 @@ module.exports = function(app) {
                     // iterates through the list array and marks the user's selection as complete
                         doc[0].list.forEach(function(e){
                         // tests loose equality because the id is a number but the text passed by the user is a string
+
                             if(e._id == listText){
 
                         // marks the item as completed and adds a timestamp for the completion, saves to the database
