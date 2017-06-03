@@ -128,9 +128,7 @@ module.exports = function(app) {
                                 });
                             }
                         outputString = 'New list item added succesfully!';
-                        break;
 
-                    case 'view':
                     // iterates through the list and populates a string to be passed back to the user by the bot's response (res)
                         function view(){
                             doc[0].list.forEach(function(e){
@@ -209,7 +207,6 @@ module.exports = function(app) {
                 }
 
                 if(err) throw err;
-
             // dynamic responses based on the command that was issued (each has a unique outputString)
                 let data = {
                     response_type: 'ephemeral',
@@ -222,7 +219,6 @@ module.exports = function(app) {
                 };
 
                 res.json(data);
-
             });
         }
     }
