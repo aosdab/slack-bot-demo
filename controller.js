@@ -42,13 +42,10 @@ function handleQueries(req, res) {
         user_id = req.user_id,
         command,
         listText;
-        // Store list items to be outputted to slack
-        // outputString = '';
 
     // `~` bitwise-operater equivalent to '!== -1'
     // It essentially does -(n + 1), so if n = -1, answer is 0 which is false
     if (~text.indexOf(' ')) {
-
       // Get command and list text
       command = req.text.substring(0, text.indexOf(' '));
       listText = req.text.substring(text.indexOf(' ') + 1);
@@ -58,80 +55,70 @@ function handleQueries(req, res) {
     }
 
     // Look for user in list:
-    User.findOne({id: user_id}).then(function(user) {
+    User.findOne({id: user_id}).then(function(result) {
 
-      // If user not found, create new user
-      if (user === null) {
-        const newUser = new User({
-          id: user_id
-        })
-        newUser.save();
-        console.log('Added a new slack user todo list document into collection');
-      }
-      else {
-        console.log(`User ${user.id} found.`);
-        switch (command) {
+      const user = createUser(result);
 
-          case 'add': 
-            let length = user.list.length;
-            user.list.push({number: length + 1, listItem: listText});
-            user.save(function(err) {
-              if (err) throw err;
-              console.log('New item added to an existing todo list document array');
-            });
+      switch (command) {
+        case 'add': 
+          let length = user.list.length;
+          user.list.push({number: length, listItem: listText});
+          user.save(function(err) {
+            if (err) throw err;
+            console.log('New item added to an existing todo list document array');
+          });
+          break;
 
-            // if (user.list.length === 0) {
-            //   outputString = 'The list is empty! Try the [add] command to populate it!';
-            // }
+        case 'complete':
+          // Some error checking
+          if (!Number(listText)) {
+            res.json({text: 'Error: Use the todo\'s `#` instead of typing it out!'});
             break;
+          }
+          user.list.forEach((e) => {
+            // Assuming the user passes in the 'id' number of the user
+            if (e.number == listText) {
+              e.completed = true;
+              e.timestampCompleted = Date.now();
 
-          case 'complete':
-            user.list.forEach((e) => {
-              // Assuming the user passes in the 'id' number of the 
-              if (e.number == listText) {
-                e.completed = true;
-                e.timestampCompleted = Date.now();
+              user.save(function(err) {
+                if (err) throw err;
+                console.log(`Item at index: ${listText} has been marked as complete.`);
+              })
+            }
+          })
+          break;
 
-                user.save(function(err) {
-                  if (err) throw err;
-                  console.log(`Item at index: ${listText} has been marked as complete.`);
-                })
-              }
-            })
-            break;
+        case 'delete':
+          user.list.splice(Number(listText), 1);
+          user.save(function(err) {
+            if (err) console.log(err);
+            console.log(`List item ${listText} has been deleted.`);
+          })
 
-          case 'delete':
-            user.list.splice(Number(listText), 1);
+          // Iterate over list again to update IDs of remaining items:
+          user.list.forEach((e, i) => {
+            user.list[i].number = i;
             user.save(function(err) {
               if (err) console.log(err);
-              console.log(`List item ${listText} has been deleted.`);
+              console.log('List item numbers have been updated.');
             })
+          })
+          break;
+        
+        case 'view':
+          // Go straight to view
+          break;
 
-            // Iterate over list again to update IDs of remaining items:
-            user.list.forEach((e, i) => {
-              user.list[i].number = i;
-              user.save(function(err) {
-                if (err) console.log(err);
-                console.log('List item numbers have been updated.');
-              })
-            })
+        case 'help':
+          res.json({
+            text: 'Hi there! The list of commands available are:\n`add <message>` - Adds a todo to the list\n`complete <#>` - Marks a todo as completed\n`delete <#>` - Deletes a todo from the list\n`view` - Shows your current todo list'
+          })
+          break;
 
-            // outputString = `List item ${listText} has been deleted.`;
-            break;
-        }
-      }
-
-      function view(list) {
-        let outputString = "```";
-        list.forEach((e) => {
-          if (e.completed) {
-            outputString += `\n${e.number} [X] ${e.listItem}\t<!date^${Date.parse(e.timestampCompleted)/1000}^(completed: {date_pretty} at {time}|failed to load>)\t\n`;
-          }
-          else {
-            outputString += `\n${e.number} [ ] ${e.listItem}\t<!date^${Date.parse(e.timestampCreated)/1000}^(created: {date_pretty} @ {time}|failed to load>)\t\n`;
-          }
-        })
-        return outputString + "```";
+        default: 
+          res.json({text: 'Invalid command! Type `/todo help` for more info.'});
+          break;
       }
 
       let data = {
@@ -147,4 +134,33 @@ function handleQueries(req, res) {
       res.json(data);
     })
   }
+}
+
+function createUser(result) {
+  // If user not found, create new user
+  if (result === null) {
+    const newUser = new User({
+      id: user_id
+    })
+    newUser.save();
+    console.log('Added a new slack user todo list document into collection');
+    return newUser;
+  }
+  else {
+    console.log(`User ${result.id} found.`);
+    return result;
+  }
+}
+
+function view(list) {
+  let outputString = "```";
+  list.forEach((e) => {
+    if (e.completed) {
+      outputString += `${e.number} [X] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCompleted)/1000}^(completed: {date_pretty} at {time}|failed to load>)\n`;
+    }
+    else {
+      outputString += `${e.number} [ ] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCreated)/1000}^(created: {date_pretty} @ {time}|failed to load>)\n`;
+    }
+  })
+  return outputString + "```";
 }
