@@ -72,7 +72,7 @@ function handleQueries(req, res) {
             console.log(`List item ${listText} has been deleted.`);
           })
 
-          // Iterate over list again to update IDs of remaining items:
+          // Iterate over list to update IDs of remaining items:
           user.list.forEach((e, i) => {
             user.list[i].number = i;
             user.save(function(err) {
@@ -108,7 +108,6 @@ function handleQueries(req, res) {
       res.json(data);
     },
     function rejected(err) {
-
       console.log('Promise rejection error:', err);
     })
   }

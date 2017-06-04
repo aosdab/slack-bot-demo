@@ -4,11 +4,11 @@ const express = require('express');
 // Using routes instead of passing in app as a function, prevented some errors
 const router = module.exports = express.Router()
 
-// Load commands
-const handleQueries = require('./commands')
-
 // Use ES6 Promises to silence deprecation warning
 mongoose.Promise = global.Promise;
+
+// Load commands
+const handleQueries = require('./commands')
 
 mongoose.connect('mongodb://localhost:27017/todo-bot')
 mongoose.connection.once('open', () => {
