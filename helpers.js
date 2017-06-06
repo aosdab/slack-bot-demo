@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 // Load schema
 const User = require('./models/user-list');
 
-function createUser(result) {
+function createUser(user_id, result) {
   // If user not found, create new user
   if (result === null) {
     const newUser = new User({

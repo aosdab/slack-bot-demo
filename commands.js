@@ -31,7 +31,7 @@ function handleQueries(req, res) {
     // Look for user in list:
     User.findOne({id: user_id}).then(function(result) {
 
-      const user = helpers.user(result);
+      const user = helpers.user(user_id, result);
 
       switch (command) {
         case 'add': 
