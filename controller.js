@@ -32,9 +32,9 @@ mongoose.connection.once('open', () => {
 // Handle GET requests
 router.get('/', function(req, res) {
   handleQueries(req.query, res);
-})
+});
 
 // Handle POST requests
 router.post('/', function(req, res) {
   handleQueries(req.body, res);
-})
+});

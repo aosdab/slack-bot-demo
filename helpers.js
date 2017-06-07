@@ -7,7 +7,7 @@ function createUser(user_id, result) {
   if (result === null) {
     const newUser = new User({
       id: user_id
-    })
+    });
     newUser.save();
     console.log('Added a new slack user todo list document into collection');
     return newUser;
@@ -35,4 +35,4 @@ function view(list) {
 module.exports = {
   user: createUser,
   view: view
-}
+};

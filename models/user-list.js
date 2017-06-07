@@ -8,13 +8,13 @@ const TodoSchema = new Schema({
   timestampCreated: {type: Date, default: Date.now()},
   completed: {type: Boolean, default: false},
   timestampCompleted: Date
-})
+});
 
 // Create user schema
 const UserSchema = new Schema({
   id: String,
   list: [TodoSchema]
-})
+});
 
 // Create user model (which will house each person's list)
 const User = mongoose.model('user', UserSchema);
