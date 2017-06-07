@@ -29,12 +29,13 @@ mongoose.connection.once('open', () => {
   console.log('Connection error:', err);
 });
 
-// Handle GET requests
-router.get('/', function(req, res) {
-  handleQueries(req.query, res);
+// request made by user clicking button in interactive message
+router.post('/command', function(req, res){
+
 });
 
 // Handle POST requests
 router.post('/', function(req, res) {
   handleQueries(req.body, res);
 });
+

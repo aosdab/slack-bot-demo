@@ -100,14 +100,40 @@ function handleQueries(req, res) {
           return res.json({text: 'Invalid command! Type `/todo help` for more info.'});
       }
 
+
+
       let data = {
         response_type: 'ephemeral',
         attachments: [
-          {
-            title: "Todo List",
-            text: (user.list.length ? helpers.view(user.list) : 'Your todo list is empty! :smiley: \nAdd something by typing `/todo add <message>`'),
-            mrkdwn_in: ['text']
-          }
+            {
+                title: "Todo List",
+                text: (user.list.length ? helpers.view(user.list) : 'Your todo list is empty! :smiley: \nAdd something by typing `/todo add <message>`'),
+                mrkdwn_in: ['text'],
+                callback_id: 'command',
+                actions: [
+                    {
+                        name: 'action',
+                        text: 'COMPLETE AN ITEM',
+                        type: 'select',
+                        value: 'complete',
+                        style: 'primary',
+                        options: helpers.display(user.list)
+                    },
+                    {
+                        name: 'action',
+                        text: 'DELETE AN ITEM',
+                        type: 'select',
+                        value: 'delete',
+                        style: 'danger',
+                        options: helpers.display(user.list),
+                        confirm: {
+                            title: 'Are you SURE?',
+                            text: 'Think about it',
+                            ok_text: 'Yes',
+                            dismiss_text: 'No'
+                        }
+                    }]
+            }
         ]
       };
       res.json(data);

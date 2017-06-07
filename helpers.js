@@ -23,16 +23,33 @@ function view(list) {
   let outputString = "```";
   list.forEach((e) => {
     if (e.completed) {
-      outputString += `${e.number} [X] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCompleted)/1000}^(completed: {date_pretty} at {time}|failed to load>)\n`;
+      outputString += `${(e.number < 10) ? (' '+e.number) : e.number} [X] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCompleted)/1000}^(completed: {date_pretty} at {time}|failed to load>)\n`;
     }
     else {
-      outputString += `${e.number} [ ] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCreated)/1000}^(created: {date_pretty} @ {time}|failed to load>)\n`;
+      outputString += `${(e.number < 10) ? (' '+e.number) : e.number} [ ] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCreated)/1000}^(created: {date_pretty} @ {time}|failed to load>)\n`;
     }
   });
-  return outputString + "```";
+  return outputString + '```';
 }
+
+function display(list){
+    let display = [];
+
+    list.forEach(function(e, i){
+
+        display[i] = {
+            text: e.listItem,
+            value: e.number
+        };
+
+    });
+
+    return display;
+}
+
 
 module.exports = {
   user: createUser,
-  view: view
+  view: view,
+  display: display
 };
