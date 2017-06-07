@@ -28,7 +28,7 @@ function view(list) {
     else {
       outputString += `${e.number} [ ] ${e.listItem}\t\t<!date^${Date.parse(e.timestampCreated)/1000}^(created: {date_pretty} @ {time}|failed to load>)\n`;
     }
-  })
+  });
   return outputString + "```";
 }
 

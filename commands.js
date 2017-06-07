@@ -3,10 +3,15 @@ const User = require('./models/user-list');
 // Load helper functions
 const helpers = require('./helpers');
 
+// Protect bot ID
+require('dotenv').config('private.env');
+const tokenID = process.env.tokenID;
+
+
 function handleQueries(req, res) {
   
   // Validate slack app token
-  if (req.token !== 'nPJ9nsPaIBb9dv2MDtDRY7sL') {
+  if (req.token !== tokenID) {
     console.error('Invalid Token');
     return res.json({text: 'Error: Invalid Token'});
   }
@@ -57,7 +62,7 @@ function handleQueries(req, res) {
           user.save(function(err) {
             if (err) throw err;
             console.log(`Item at index: ${listText} has been marked as complete.`);
-          })
+          });
           break;
 
         case 'delete':
@@ -70,7 +75,7 @@ function handleQueries(req, res) {
           user.save(function(err) {
             if (err) console.log(err);
             console.log(`List item ${listText} has been deleted.`);
-          })
+          });
 
           // Iterate over list to update IDs of remaining items:
           user.list.forEach((e, i) => {
@@ -79,7 +84,7 @@ function handleQueries(req, res) {
               if (err) console.log(err);
               console.log('List item numbers have been updated.');
             })
-          })
+          });
           break;
         
         case 'view':
@@ -89,7 +94,7 @@ function handleQueries(req, res) {
         case 'help':
           return res.json({
             text: 'Hi there! The list of commands available are:\n`add <message>` - Adds a todo to the list\n`complete <#>` - Marks a todo as completed\n`delete <#>` - Deletes a todo from the list\n`view` - Shows your current todo list'
-          })
+          });
 
         default: 
           return res.json({text: 'Invalid command! Type `/todo help` for more info.'});
