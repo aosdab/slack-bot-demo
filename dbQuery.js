@@ -2,18 +2,19 @@
  * Created by Vampiire on 6/7/17.
  */
 
+// mongoose
+    require('mongoose');
+
 // Load helper functions
 const helpers = require('./helpers');
 
 // Load schema
 const User = require('./models/user-list');
 
-let data;
-
 // Look for user in list:
 function dbQuery(ID, command, text = null){
 
-    User.findOne({id: ID}).then(function(result) {
+    return User.findOne({id: ID}).then(function(result) {
 
         const user = helpers.user(ID, result);
 
@@ -23,33 +24,27 @@ function dbQuery(ID, command, text = null){
                 user.list.push({number: length, listItem: text});
                 user.save(function(err) {
                     if (err) throw err;
-                    console.log('New item added to an existing todo list document array');
                 });
                 break;
 
             case 'complete':
                 text = Number(text);
-                // Some error checking
-                if (isNaN(text)) {
-                    console.log('Is it NaN?:', isNaN(text));
-                    data = {text: 'Error: Use the todo\'s `#` instead of typing it out!'};
-                }
+
                 // Assuming the user passes in the 'id' number of the user
                 user.list[text].completed = true;
                 user.list[text].timestampCompleted = Date.now();
 
                 user.save(function(err) {
                     if (err) throw err;
-                    console.log(`Item at index: ${text} has been marked as complete.`);
                 });
+                break;
+
+            case 'view':
                 break;
 
             case 'delete':
                 text = Number(text);
-                // Some error checking
-                if (isNaN(text)) {
-                    data = {text: 'Error: Use the todo\'s `#` instead of typing it out!'};
-                }
+
                 user.list.splice(text, 1);
                 user.save(function(err) {
                     if (err) console.log(err);
@@ -61,32 +56,31 @@ function dbQuery(ID, command, text = null){
                     user.list[i].number = i;
                     user.save(function(err) {
                         if (err) console.log(err);
-                        console.log('List item numbers have been updated.');
                     })
                 });
                 break;
 
             case 'help':
-                data = {
-                    text: 'Hi there! The list of commands available are:\n`add <message>` - Adds a todo to the list\n`complete <#>`'
+                return {
+                    text: 'Hi there! The list of commands available are:\n`add <message>` - Adds a todo to the list\n`view` - Shows your todo list'
                 };
                 break;
 
             default:
-                data = {text: 'Invalid command! Type `/todo help` for more info.'};
+                return {text: 'Invalid command! Type `/todo help` for more info.'};
         }
 
-        data = {
+       return {
             response_type: 'ephemeral',
             attachments: [
                 {
                     title: "Todo List",
-                    text: (user.list.length ? helpers.view(user.list) : 'Your todo list is empty! :smiley: \nAdd something by typing `/todo add <message>`'),
+                    text: (user.list.length ? helpers.view(user.list) : 'Your todo list is empty! :cry: \nAdd something by typing `/todo add <message>`'),
                     mrkdwn_in: ['text'],
                     callback_id: 'command',
                     actions: [
                         {
-                            name: 'action',
+                            name: 'complete',
                             text: 'COMPLETE AN ITEM',
                             type: 'select',
                             value: 'complete',
@@ -94,18 +88,12 @@ function dbQuery(ID, command, text = null){
                             options: helpers.display(user.list)
                         },
                         {
-                            name: 'action',
+                            name: 'delete',
                             text: 'DELETE AN ITEM',
                             type: 'select',
                             value: 'delete',
                             style: 'danger',
-                            options: helpers.display(user.list),
-                            confirm: {
-                                title: 'Are you SURE?',
-                                text: 'Think about it',
-                                ok_text: 'Yes',
-                                dismiss_text: 'No'
-                            }
+                            options: helpers.display(user.list)
                         }]
                 }
             ]
@@ -113,7 +101,5 @@ function dbQuery(ID, command, text = null){
 
     });
 
-    return data;
 }
-
 module.exports = dbQuery;

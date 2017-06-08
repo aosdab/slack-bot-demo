@@ -35,6 +35,8 @@ mongoose.connection.once('open', () => {
 // request made by user clicking button in interactive message
 router.post('/command', function(req, res){
 
+    console.log('command');
+
     let payload = JSON.parse(req.body.payload),
         token = payload.token,
         ID,
@@ -49,16 +51,17 @@ router.post('/command', function(req, res){
         index = payload.actions[0].selected_options[0].value;
 
         // call a database query
-        let data = dbQuery(ID, command, text);
+        dbQuery(ID, command, index).then(function(data){
+            res.json(data);
+        });
 
-        res.json(data);
+
     }
 
     else{
         res.json('Invalid Slack Bot token');
     }
 
-    res.json('worked');
 
 });
 
@@ -84,11 +87,10 @@ router.post('/', function(req, res) {
         }
 
         // call a database query
-        let data = dbQuery(ID, command, text);
+        dbQuery(ID, command, text).then(function(data){
+            res.json(data);
+        });
 
-        console.log(`data ${data}`);
-
-        res.json(data);
     }
 
     else{
