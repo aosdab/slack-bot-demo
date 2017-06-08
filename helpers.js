@@ -13,9 +13,21 @@ function createUser(user_id, result) {
     return newUser;
   }
   else {
-    console.log(`User ${result.id} found.`);
+    // console.log(`User ${result.id} found.`);
     return result;
   }
+
+}
+
+
+// Protect bot token ID
+require('dotenv').config('private.env');
+const tokenID = process.env.tokenID;
+
+
+// confirms validity of slack bot token received from user
+function validate(token){
+    return token === tokenID;
 }
 
 function view(list) {
@@ -50,6 +62,7 @@ function display(list){
 
 module.exports = {
   user: createUser,
+  validate: validate,
   view: view,
   display: display
 };

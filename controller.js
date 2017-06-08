@@ -13,17 +13,20 @@ const router = module.exports = express.Router();
 // Use ES6 Promises to silence deprecation warning
 mongoose.Promise = global.Promise;
 
-// Load commands
-const handleQueries = require('./commands');
+// database queries function
+const dbQuery = require('./dbQuery');
+
+// helper function to validate token
+const helper = require('./helpers');
 
 // local testing
-//     mongoose.connect('mongodb://localhost:27017/todo-bot');
+// mongoose.connect('mongodb://localhost:27017/todo-bot');
 
 // deployment
 mongoose.connect(ROUTE);
 
 mongoose.connection.once('open', () => {
-  console.log('Connected to DB.');
+  // console.log('Connected to DB.');
 })
 .on('error', function(err) {
   console.log('Connection error:', err);
@@ -32,10 +35,67 @@ mongoose.connection.once('open', () => {
 // request made by user clicking button in interactive message
 router.post('/command', function(req, res){
 
+    let payload = JSON.parse(req.body.payload),
+        token = payload.token,
+        ID,
+        command,
+        index;
+
+// validates the slack bot token passed by the user
+    if(helper.validate(token)){
+        // parse the payload and extract the ID, command, and index
+        ID = payload.user.id;
+        command = payload.actions[0].name;
+        index = payload.actions[0].selected_options[0].value;
+
+        // call a database query
+        let data = dbQuery(ID, command, text);
+
+        res.json(data);
+    }
+
+    else{
+        res.json('Invalid Slack Bot token');
+    }
+
+    res.json('worked');
+
 });
 
 // Handle POST requests
 router.post('/', function(req, res) {
-  handleQueries(req.body, res);
+
+    let body = req.body,
+        rawText = body.text,
+        token = body.token,
+        ID = body.user_id,
+        command,
+        text;
+
+    if(helper.validate(token)){
+
+        if (~rawText.indexOf(' ')) {
+            // Get command and list text
+            command = rawText.substring(0, rawText.indexOf(' '));
+            text = rawText.substring(rawText.indexOf(' ') + 1);
+        }
+        else {
+            command = rawText;
+        }
+
+        // call a database query
+        let data = dbQuery(ID, command, text);
+
+        console.log(`data ${data}`);
+
+        res.json(data);
+    }
+
+    else{
+        console.log(req.body);
+        res.json('Invalid Slack Bot token');
+    }
+
 });
+
 
